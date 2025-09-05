@@ -59,8 +59,8 @@ See [`Profile.js`](./Profile.js):
 
 ### Health Check
 
-```bash
-curl http://localhost:3000/health
+```
+curl https://me-api-playground-5zor.onrender.com/health
 ```
 
 ## Known Limitations
