@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Me-API Playground</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+    section { margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; border-radius: 5px; }
+    h2 { margin-top: 0; color: #333; }
+    .form-group { margin-bottom: 10px; }
+    button { padding: 8px 12px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }
+    button:hover { background-color: #45a049; }
+    input { padding: 8px; margin-right: 10px; }
+    .result { margin-top: 10px; padding: 10px; }
+    .info-item { margin-bottom: 5px; }
+    .link a { margin-right: 10px; text-decoration: none; color: #0066cc; }
+    .link a:hover { text-decoration: underline; }
+    .error { color: red; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    ul { list-style-type: disc; padding-left: 20px; }
+    /* Responsive table with scrollbar for small screens */
+    @media (max-width: 400px) {
+      .education-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .education-table-container table {
+        min-width: 600px;
+      }
+      body { padding: 10px; }
+      section { padding: 10px; }
+      button { width: 100%; margin-bottom: 10px; }
+      input { width: 70%; }
+    }
+    @media (max-width: 600px) {
+      table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Me-API Playground</h1>
+  
+  <section id="personal-section">
+    <h2>Personal Information</h2>
+    <button onclick="loadPersonal()">Load Personal Information</button>
+    <div id="personal-result" class="result"></div>
+  </section>
+
+  <section id="links-section">
+    <h2>Links</h2>
+    <button onclick="loadLinks()">Load Links</button>
+    <div id="links-result" class="result"></div>
+  </section>
+
+  <section id="education-section">
+    <h2>Education</h2>
+    <button onclick="loadEducation()">Load Education</button>
+    <div id="education-result" class="result">
+      <div class="education-table-container">
+        <table class="education-table"></table>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience-section">
+    <h2>Experience</h2>
+    <button onclick="loadExperience()">Load Experience</button>
+    <div id="experience-result" class="result"></div>
+  </section>
+
+  <section id="projects-section">
+    <h2>Projects</h2>
+    <button onclick="loadProjects()">Load Projects</button>
+    <div id="projects-result" class="result"></div>
+  </section>
+
+  <section id="skills-section">
+    <h2>Technical Skills</h2>
+    <button onclick="loadSkills()">Load Skills</button>
+    <div id="skills-result" class="result"></div>
+  </section>
+
+  <section id="achievements-section">
+    <h2>Achievements</h2>
+    <button onclick="loadAchievements()">Load Achievements</button>
+    <div id="achievements-result" class="result"></div>
+  </section>
+
+  <script>
+  async function fetchProfile() {
+    const response = await fetch('/profile', {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) throw new Error('Failed to load profile');
+    return response.json();
+  }
+
+  async function fetchProjects() {
+    const response = await fetch('/projects', {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) throw new Error('Failed to load projects');
+    return response.json();
+  }
+
+  function renderPersonal(profile) {
+    document.getElementById('personal-result').innerHTML = `
+      <div class="info-item"><strong>Name:</strong> ${profile.name || 'N/A'}</div>
+      <div class="info-item"><strong>Enrollment No:</strong> ${profile.enrollmentNo || 'N/A'}</div>
+      <div class="info-item"><strong>DOB:</strong> ${profile.dob || 'N/A'}</div>
+      <div class="info-item"><strong>Mobile No:</strong> ${profile.mobileNo || 'N/A'}</div>
+    `;
+  }
+
+  function renderLinks(profile) {
+    document.getElementById('links-result').innerHTML = `
+      <div class="link">
+        <div class="info-item"><strong>LinkedIn:</strong> <a href="${profile.links.linkedin || '#'}">${profile.links.linkedin || 'N/A'}</a></div>
+        <div class="info-item"><strong>GitHub:</strong> <a href="${profile.links.github || '#'}">${profile.links.github || 'N/A'}</a></div>
+        <div class="info-item"><strong>Portfolio:</strong> <a href="${profile.links.portfolio || '#'}">${profile.links.portfolio || 'N/A'}</a></div>
+      </div>
+    `;
+  }
+
+  function renderEducation(profile) {
+    let table = '<table class="education-table"><thead><tr><th>Degree/Course</th><th>Institute/Board</th><th>CGPA/Percentage</th><th>Year</th></tr></thead><tbody>';
+    (profile.education || []).forEach(e => {
+      table += `<tr><td>${e.degree || 'N/A'}</td><td>${e.institute || 'N/A'}</td><td>${e.cgpa || 'N/A'}</td><td>${e.year || 'N/A'}</td></tr>`;
+    });
+    table += '</tbody></table>';
+    document.getElementById('education-result').innerHTML = '<div class="education-table-container">' + table + '</div>';
+  }
+
+  function renderExperience(profile) {
+    let html = '';
+    (profile.work || []).forEach(w => {
+      html += `
+        <div class="info-item">
+          <h3>${w.title || 'N/A'}</h3>
+          <p>${w.description || 'N/A'}</p>
+          ${w.links && w.links.length > 0 ? `<p><strong>Links:</strong> ${w.links.map(link => `<a href="${link}" target="_blank">${link}</a>`).join(', ')}</p>` : ''}
+        </div>
+      `;
+    });
+    document.getElementById('experience-result').innerHTML = html || '<div class="error">No experience found.</div>';
+  }
+
+  function renderProjects(projects) {
+    let html = '';
+    (projects || []).forEach(p => {
+      html += `
+        <div class="info-item">
+          <h3>${p.title || 'N/A'}</h3>
+          <p>${p.description || 'N/A'}</p>
+          <p><strong>Links:</strong> ${(p.links || []).map(link => `<a href="${link}" target="_blank">${link}</a>`).join(', ') || 'N/A'}</p>
+          <p><strong>Skills:</strong> ${(p.skills || []).join(', ') || 'N/A'}</p>
+        </div>
+      `;
+    });
+    document.getElementById('projects-result').innerHTML = html || '<div class="error">No projects found.</div>';
+  }
+
+  function renderSkills(profile) {
+    const skills = profile.skills || [];
+    const webDevSkills = skills.filter(s => ['JavaScript', 'React', 'HTML', 'CSS', 'ejs', 'Express.js', 'Bootstrap', 'Node.js', 'MySQL', 'MongoDB', 'Mongoose', 'Web Development'].includes(s));
+    const dataScienceSkills = skills.filter(s => ['Python', 'C', 'C++', 'Java', 'Pandas', 'Rasterio', 'NumPy', 'Machine Learning', 'Remote Sensing', 'Jupyter Notebook', 'QGIS', 'Google Earth Engine', 'Hugging Face'].includes(s));
+    const cloudSkills = skills.filter(s => ['AWS', 'Render'].includes(s));
+    const generalSkills = skills.filter(s => ['Data Structures and Algorithms', 'Object Oriented Programming', 'version Control using git and github'].includes(s));
+
+    let html = '<h3>Web Development</h3><ul>';
+    webDevSkills.forEach(s => { html += `<li>${s}</li>`; });
+    html += '</ul>';
+
+    html += '<h3>Data Science & Geospatial Analysis</h3><ul>';
+    dataScienceSkills.forEach(s => { html += `<li>${s}</li>`; });
+    html += '</ul>';
+
+    html += '<h3>Cloud & Deployment</h3><ul>';
+    cloudSkills.forEach(s => { html += `<li>${s}</li>`; });
+    html += '</ul>';
+
+    html += '<h3>General Programming & Tools</h3><ul>';
+    generalSkills.forEach(s => { html += `<li>${s}</li>`; });
+    html += '</ul>';
+
+    document.getElementById('skills-result').innerHTML = html || '<div class="error">No skills found.</div>';
+  }
+
+  function renderAchievements(profile) {
+    let html = '';
+    (profile.achievements || []).forEach(a => {
+      const boldTitle = a.replace(/^(JEE Mains 2023|NEET 2023)/, '<strong>$1</strong>:');
+      html += `<div class="info-item">${boldTitle}</div>`;
+    });
+    document.getElementById('achievements-result').innerHTML = html || '<div class="error">No achievements found.</div>';
+  }
+
+  async function loadPersonal() {
+    try {
+      const profile = await fetchProfile();
+      renderPersonal(profile);
+    } catch (err) {
+      document.getElementById('personal-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadLinks() {
+    try {
+      const profile = await fetchProfile();
+      renderLinks(profile);
+    } catch (err) {
+      document.getElementById('links-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadEducation() {
+    try {
+      const profile = await fetchProfile();
+      renderEducation(profile);
+    } catch (err) {
+      document.getElementById('education-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadExperience() {
+    try {
+      const profile = await fetchProfile();
+      renderExperience(profile);
+    } catch (err) {
+      document.getElementById('experience-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadProjects() {
+    try {
+      const projects = await fetchProjects();
+      renderProjects(projects);
+    } catch (err) {
+      document.getElementById('projects-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadSkills() {
+    try {
+      const profile = await fetchProfile();
+      renderSkills(profile);
+    } catch (err) {
+      document.getElementById('skills-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+
+  async function loadAchievements() {
+    try {
+      const profile = await fetchProfile();
+      renderAchievements(profile);
+    } catch (err) {
+      document.getElementById('achievements-result').innerHTML = `<div class="error">${err.message}</div>`;
+    }
+  }
+</script>
+</body>
+</html>
