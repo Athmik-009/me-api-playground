@@ -33,7 +33,6 @@ const ProfileSchema = new mongoose.Schema({
   links: {
     github: String,
     linkedin: String,
-    portfolio: String
   },
   achievements: [String]
 });
